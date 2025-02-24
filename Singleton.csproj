@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Csv" Version="2.0.128" />
+  </ItemGroup>
+
 </Project>
