@@ -3,6 +3,14 @@ using Csv;
 namespace Singleton.Models;
 
 public class Dataset {
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="keys"></param>
+    /// <param name="rowsCount"></param>
+    /// <returns></returns>
     public static Dictionary<string, List<string>> ReadDataset(string path, string[] keys, int? rowsCount = null) {
         string? csv = File.ReadAllText(path);
         Dictionary<string, List<string>> result = [];
@@ -22,6 +30,11 @@ public class Dataset {
         return result;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="values"></param>
+    /// <returns></returns>
     public static List<float> TextTofloat(List<string> values) {
         List<string> distincts = [.. values.Distinct()];
         Dictionary<string, int> labels = [];
@@ -38,6 +51,11 @@ public class Dataset {
         return numbers;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="values"></param>
+    /// <returns></returns>
     public static List<float>? StringifiedNumbersTofloat(List<string> values) {
         List<float> numbers = [];
         foreach (string value in values)
@@ -49,6 +67,11 @@ public class Dataset {
         return numbers;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="values"></param>
+    /// <returns></returns>
     public static float[] Normalize(float[] values) {
         float min = values[0];
         float max = values[0];
@@ -66,6 +89,11 @@ public class Dataset {
         return values;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="dataset"></param>
+    /// <returns></returns>
     public static Dictionary<string, float[]> ConvertDatasetToNormalizedData(Dictionary<string, List<string>> dataset) {
         Dictionary<string, float[]> result = [];
         foreach (KeyValuePair<string, List<string>> column in dataset) {

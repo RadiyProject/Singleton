@@ -1,8 +1,14 @@
-using System;
+namespace Singleton.Models.MembershipFunctions;
 
-namespace Singleton.Models;
-
-public class Gauss
+public class Gauss(float leftBorder, float rightBorder) : MembershipFunction(leftBorder, rightBorder)
 {
+    public override float CalculateMembershipValue(float element)
+    {
+        throw new NotImplementedException();
+    }
 
+    protected override float[,] DivideIntoMultipleAreas(int areasCount)
+    {
+        throw new NotImplementedException();
+    }
 }
