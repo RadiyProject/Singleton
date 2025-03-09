@@ -2,16 +2,18 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Singleton.Models;
 
-namespace Singleton.Controllers
+namespace Singleton.Controllers;
+[Route("dataset")]
+[ApiController]
+public class DatasetController : ControllerBase
 {
-    [Route("dataset")]
-    [ApiController]
-    public class DatasetController : ControllerBase
+    [HttpGet("")]
+    public IActionResult GetFile()
     {
-        [HttpGet("")]
-        public IActionResult GetFile()
-        {
-            return Ok(JsonSerializer.Serialize(Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"])));
-        }
+        var dataset = Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"], rowsCount: 5000);
+        var result = Dataset.ConvertDatasetToNormalizedData(dataset);
+
+        return Ok("{" + string.Join("\n", result.Select(kv => kv.Key + "=" + JsonSerializer.Serialize(kv.Value)).ToArray()) + "}");
     }
+
 }

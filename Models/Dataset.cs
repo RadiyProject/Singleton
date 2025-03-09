@@ -3,41 +3,45 @@ using Csv;
 namespace Singleton.Models;
 
 public class Dataset {
-    public static Dictionary<string, List<string>> ReadDataset(string path, string[] keys) {
+    public static Dictionary<string, List<string>> ReadDataset(string path, string[] keys, int? rowsCount = null) {
         string? csv = File.ReadAllText(path);
         Dictionary<string, List<string>> result = [];
 
+        int i = 0;
         foreach (ICsvLine line in CsvReader.ReadFromText(csv))
         {
-            foreach (string key in keys) {
+            if (rowsCount != null && rowsCount <= i)
+                break;
+
+            foreach (string key in keys)
                 result[key] = result.TryGetValue(key, out List<string>? value) 
                     ? [.. value, line[key]] : result[key] = [line[key]];
-            }
+            i++;
         }
 
         return result;
     }
 
-    public static List<double> TextToDouble(List<string> values) {
+    public static List<float> TextTofloat(List<string> values) {
         List<string> distincts = [.. values.Distinct()];
         Dictionary<string, int> labels = [];
         int i = 0;
         foreach (string distinct in distincts) {
-            labels[distinct] = i;
+            labels[distinct] = i + 1;
             i++;
         }
 
-        List<double> numbers = [];
+        List<float> numbers = [];
         foreach (string value in values)
             numbers = [.. numbers, labels[value]];
 
         return numbers;
     }
 
-    public static List<double>? StringifiedNumbersToDouble(List<string> values) {
-        List<double> numbers = [];
+    public static List<float>? StringifiedNumbersTofloat(List<string> values) {
+        List<float> numbers = [];
         foreach (string value in values)
-            if (double.TryParse(value, out double parsed))
+            if (float.TryParse(value, out float parsed))
                 numbers = [.. numbers, parsed];
             else
                 return null;
@@ -45,20 +49,32 @@ public class Dataset {
         return numbers;
     }
 
-    public static double[] Normalize(double[] values) {
-        double min = values[0];
-        double max = values[0];
-        foreach (double value in values) {
+    public static float[] Normalize(float[] values) {
+        float min = values[0];
+        float max = values[0];
+        foreach (float value in values) {
             if (value < min)
                 min = value;
             if (value > max)
                 max = value;
         }
 
-        double subtracted = max - min;
+        float subtracted = max - min;
         for (int i = 0; i < values.Length; i++)
-            values[i] = (values[i] - min) / subtracted;
+            values[i] = subtracted != 0 ? (values[i] - min) / subtracted : 1;
 
         return values;
+    }
+
+    public static Dictionary<string, float[]> ConvertDatasetToNormalizedData(Dictionary<string, List<string>> dataset) {
+        Dictionary<string, float[]> result = [];
+        foreach (KeyValuePair<string, List<string>> column in dataset) {
+            List<float>? convertedColumn = StringifiedNumbersTofloat(column.Value);
+            convertedColumn ??= TextTofloat(column.Value);
+
+            result[column.Key] = Normalize([.. convertedColumn]);
+        }
+
+        return result;
     }
 }
