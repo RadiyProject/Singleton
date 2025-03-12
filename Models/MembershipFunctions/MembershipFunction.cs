@@ -6,38 +6,42 @@ public abstract class MembershipFunction
     protected readonly float rightBorder;
 
     protected readonly float[,] areas; 
-    protected const int pointsCount = 2;
-    protected const float initialOffset = -0.5f;
+    protected int pointsCount;
+    protected float initialOffset;
 
-    public MembershipFunction(float leftBorder = 0, float rightBorder = 1, int areasCount = 3) 
+    public MembershipFunction(float leftBorder = 0, float rightBorder = 1, int areasCount = 3, int pointsCount = 2) 
     {
         if (leftBorder > rightBorder)
             (rightBorder, leftBorder) = (leftBorder, rightBorder);
 
         this.leftBorder = leftBorder;
         this.rightBorder = rightBorder;
+        this.pointsCount = pointsCount;
 
         areas = DivideIntoMultipleAreas(areasCount > 0 ? areasCount : 3);
+        //throw new Exception(Newtonsoft.Json.JsonConvert.SerializeObject(areas));
+        initialOffset = (areas[0, areas.GetLength(1) - 1] - areas[0, 0]) * 0.5f;
     }
 
     public float CalculateMembershipValue(float element, int areaId)
     {
         float[] borders = new float[areas.GetLength(1)];
+
         for (int i = 0; i < borders.Length; i++)
             borders[i] = areas[areaId, i];
         
-        return FunctionRule(element, borders);
+        return FunctionRule(element + initialOffset, borders);
     }
 
     protected float[,] DivideIntoMultipleAreas(int areasCount)
     {
         float[,] result = new float[areasCount, pointsCount];
-        float step = (rightBorder - leftBorder) / areasCount;
+        float step = (rightBorder - leftBorder) / pointsCount / (areasCount - (areasCount > 1 ? 1 : 0));
         for (int i = 0; i < areasCount; i++) {
             if (i == 0)
-                result[i, 0] = step * initialOffset;
+                result[i, 0] = 0;
             else
-                result[i, 0] = result[i - 1, 2] - step * 0.5f;
+                result[i, 0] = result[i - 1, pointsCount - 1] - step;
 
             for (int j = 1; j < result.GetLength(1); j++)
                 result[i, j] = result[i, j - 1] + step;

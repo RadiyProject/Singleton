@@ -1,0 +1,17 @@
+﻿@page
+@model Singleton.Pages.GraphModel
+@{
+    ViewData["Title"] = "Graph";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Triangle, Trapezoid, Parabola, Gauss.</p>
+
+<ejs-chart id="container">
+    <e-chart-primaryxaxis valueType="@Syncfusion.EJ2.Charts.ValueType.Category"></e-chart-primaryxaxis>
+    <e-series-collection>
+        <e-series xName="x" yName="y" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Line" title="Triangle" query="new ej.data.Query()">
+            <e-data-manager url="http://localhost:8085/api/dataset/triangle/10" adaptor="WebApiAdaptor"></e-data-manager>
+        </e-series>
+    </e-series-collection>
+</ejs-chart>

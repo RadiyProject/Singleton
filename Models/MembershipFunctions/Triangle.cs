@@ -1,10 +1,7 @@
 namespace Singleton.Models.MembershipFunctions;
 
-public class Triangle(float leftBorder, float rightBorder, int areasCount) : MembershipFunction(leftBorder, rightBorder, areasCount)
+public class Triangle(float leftBorder, float rightBorder, int areasCount) : MembershipFunction(leftBorder, rightBorder, areasCount, 3)
 {
-    protected new const int pointsCount = 3;
-    protected new const float initialOffset = -1f;
-
     protected override float FunctionRule(float value, float[] borders)
     {
         CheckBorders(borders, "треугольника");

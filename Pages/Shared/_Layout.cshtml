@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Singleton.styles.css" asp-append-version="true" />
+    <script src="https://cdn.syncfusion.com/ej2/28.2.3/dist/ej2.min.js"></script>
+    <script src="_content/PSC.Blazor.Components.Chartjs/lib/Chart.js/chart.js"></script>
 </head>
 <body>
     <header>
@@ -25,6 +27,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Graph">Graph</a>
                         </li>
                     </ul>
                 </div>
@@ -48,5 +53,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    <ejs-scripts></ejs-scripts>
 </body>
 </html>

@@ -1,10 +1,7 @@
 namespace Singleton.Models.MembershipFunctions;
 
-public class Trapezoid(float leftBorder, float rightBorder, int areasCount) : MembershipFunction(leftBorder, rightBorder, areasCount)
+public class Trapezoid(float leftBorder, float rightBorder, int areasCount) : MembershipFunction(leftBorder, rightBorder, areasCount, 4)
 {
-    protected new const int pointsCount = 4;
-    protected new const float initialOffset = -1.5f;
-
     protected override float FunctionRule(float value, float[] borders)
     {
         CheckBorders(borders, "трапеции");
