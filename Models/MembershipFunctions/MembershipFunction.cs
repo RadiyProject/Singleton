@@ -30,21 +30,22 @@ public abstract class MembershipFunction
         for (int i = 0; i < borders.Length; i++)
             borders[i] = areas[areaId, i];
         
-        return FunctionRule(element + initialOffset, borders);
+        return FunctionRule(element/* + initialOffset*/, borders);
     }
 
     protected float[,] DivideIntoMultipleAreas(int areasCount)
     {
         float[,] result = new float[areasCount, pointsCount];
-        float step = (rightBorder - leftBorder) / pointsCount / (areasCount - (areasCount > 1 ? 1 : 0));
+        float step = (rightBorder - leftBorder) / (areasCount - (areasCount > 1 ? 1 : 0));
+        float pointStep = step / (pointsCount - 1);
         for (int i = 0; i < areasCount; i++) {
             if (i == 0)
-                result[i, 0] = 0;
+                result[i, 0] = areasCount > 1 ? -step : 0;
             else
-                result[i, 0] = result[i - 1, pointsCount - 1] - step;
+                result[i, 0] = result[i - 1, 0] + step;
 
             for (int j = 1; j < result.GetLength(1); j++)
-                result[i, j] = result[i, j - 1] + step;
+                result[i, j] = result[i, j - 1] + pointStep * (areasCount > 1 ? 2 : 1);
         }
 
         return result;

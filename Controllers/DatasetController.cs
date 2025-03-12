@@ -31,7 +31,7 @@ public class DatasetController : ControllerBase
         else
             function = new Triangle(0, 1, areasCount);
         
-        int points = 100;
+        int points = areasCount * 200;
         float step = 1f / points;
         List<Dictionary<string, float>> result = [];
         for (int j = 0; j < areasCount; j++) {

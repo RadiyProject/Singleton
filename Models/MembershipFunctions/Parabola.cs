@@ -7,8 +7,8 @@ public class Parabola(float leftBorder, float rightBorder, int areasCount) : Mem
         CheckBorders(borders, "параболы");
         return true switch
         {
-            true when value >= (borders[1] - borders[0]) && value <= (borders[1] + borders[0]) 
-                => 1 - (value - borders[1]) * (value - borders[1]) / borders[0] * borders[0],
+            true when value >= (borders[0] - borders[1]) && value <= (borders[0] + borders[1]) 
+                => 1 - (value - borders[0]) * (value - borders[0]) / borders[1] * borders[1],
             _ => 0
         };
     }
