@@ -9,7 +9,7 @@ public class Parabola(float leftBorder, float rightBorder, int areasCount) : Mem
         {
             true when value >= borders[0] && value <= borders[1] => 1 - (float)Math.Pow((value - borders[0]) / (borders[1] - borders[0]), 2),
             true when value >= borders[1] && value <= borders[2] => 1 - (float)Math.Pow((borders[2] - value) / (borders[2] - borders[1]), 2),
-            _ => 0
+            _ => 1
         };
     }
 }
