@@ -20,7 +20,6 @@ public abstract class MembershipFunction
 
         areas = DivideIntoMultipleAreas(areasCount > 0 ? areasCount : 3);
         //throw new Exception(Newtonsoft.Json.JsonConvert.SerializeObject(areas));
-        initialOffset = (areas[0, areas.GetLength(1) - 1] - areas[0, 0]) * 0.5f;
     }
 
     public float CalculateMembershipValue(float element, int areaId)
@@ -30,7 +29,7 @@ public abstract class MembershipFunction
         for (int i = 0; i < borders.Length; i++)
             borders[i] = areas[areaId, i];
         
-        return FunctionRule(element/* + initialOffset*/, borders);
+        return FunctionRule(element, borders);
     }
 
     protected float[,] DivideIntoMultipleAreas(int areasCount)
