@@ -5,12 +5,16 @@ public abstract class MembershipFunction
     protected readonly float leftBorder;
     protected readonly float rightBorder;
 
-    protected readonly float[,] areas; 
+    public readonly float[,] areas; 
     protected int pointsCount;
     protected float initialOffset;
 
+    public int AreasCount { get; }
+
     public MembershipFunction(float leftBorder = 0, float rightBorder = 1, int areasCount = 3, int pointsCount = 2) 
     {
+        if (areasCount <= 0)
+            throw new InvalidDataException();
         if (leftBorder > rightBorder)
             (rightBorder, leftBorder) = (leftBorder, rightBorder);
 
@@ -18,8 +22,8 @@ public abstract class MembershipFunction
         this.rightBorder = rightBorder;
         this.pointsCount = pointsCount;
 
-        areas = DivideIntoMultipleAreas(areasCount > 0 ? areasCount : 3);
-        //throw new Exception(Newtonsoft.Json.JsonConvert.SerializeObject(areas));
+        areas = DivideIntoMultipleAreas(areasCount);
+        AreasCount = areasCount;
     }
 
     public float CalculateMembershipValue(float element, int areaId)

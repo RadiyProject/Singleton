@@ -11,12 +11,12 @@ public class Dataset {
     /// <param name="keys"></param>
     /// <param name="rowsCount"></param>
     /// <returns></returns>
-    public static Dictionary<string, List<string>> ReadDataset(string path, string[] keys, int? rowsCount = null) {
+    public static async Task<Dictionary<string, List<string>>> ReadDataset(string path, string[] keys, int? rowsCount = null) {
         string? csv = File.ReadAllText(path);
         Dictionary<string, List<string>> result = [];
 
         int i = 0;
-        foreach (ICsvLine line in CsvReader.ReadFromText(csv))
+        await foreach (ICsvLine line in CsvReader.ReadFromTextAsync(csv))
         {
             if (rowsCount != null && rowsCount <= i)
                 break;

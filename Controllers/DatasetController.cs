@@ -9,9 +9,9 @@ namespace Singleton.Controllers;
 public class DatasetController : ControllerBase
 {
     [HttpGet("")]
-    public IActionResult GetFile()
+    public async Task<IActionResult> GetFile()
     {
-        var dataset = Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"], rowsCount: 5000);
+        var dataset = await Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"], rowsCount: 5000);
         var result = Dataset.ConvertDatasetToNormalizedData(dataset);
 
         return Ok("{" + string.Join("\n", result.Select(kv => kv.Key + "=" + JsonSerializer.Serialize(kv.Value)).ToArray()) + "}");
@@ -51,5 +51,30 @@ public class DatasetController : ControllerBase
         resultResult["Count"] = result.Count;
 
         return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(resultResult));
+    }
+
+    [HttpGet("calculate/{functionName}/{areasCount}/{outputName}")]
+    public async Task<IActionResult> Calculate(string functionName, int areasCount, string outputName)
+    {
+        MembershipFunction function;
+        if (functionName == "trapezoid")
+            function = new Trapezoid(0, 1, areasCount);
+        else if (functionName == "parabola")
+            function = new Parabola(0, 1, areasCount);
+        else if (functionName == "gauss")
+            function = new Gauss(0, 1, areasCount);
+        else
+            function = new Triangle(0, 1, areasCount);
+
+        var dataset = await Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"], rowsCount: 2000);
+        var normalized = Dataset.ConvertDatasetToNormalizedData(dataset);
+        float[] output = new float[normalized[outputName].Length];
+        float[] outputDistinct = [.. output.Distinct()];
+        normalized[outputName].CopyTo(output, 0);
+        normalized.Remove(outputName);
+
+        var result = FuzzyData.NormalizedDataToFuzzyData(normalized, function);
+
+        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(output));
     }
 }

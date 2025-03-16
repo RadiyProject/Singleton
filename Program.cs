@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Http.Connections;
+using Singleton.Hubs;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -24,5 +28,9 @@ app.MapStaticAssets();
 app.MapControllers();
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapHub<ChatHub>("/chatHub", options => {
+    options.Transports = HttpTransportType.ServerSentEvents;
+});
 
 app.Run();
