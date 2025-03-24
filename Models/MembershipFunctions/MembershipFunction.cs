@@ -13,8 +13,9 @@ public abstract class MembershipFunction
 
     public MembershipFunction(float leftBorder = 0, float rightBorder = 1, int areasCount = 3, int pointsCount = 2) 
     {
-        if (areasCount <= 0)
+        if (areasCount <= 0 || pointsCount < 2)
             throw new InvalidDataException();
+
         if (leftBorder > rightBorder)
             (rightBorder, leftBorder) = (leftBorder, rightBorder);
 

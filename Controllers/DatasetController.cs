@@ -11,14 +11,19 @@ public class DatasetController : ControllerBase
     [HttpGet("")]
     public async Task<IActionResult> GetFile()
     {
-        var dataset = await Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"], rowsCount: 5000);
+        var dataset = await Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"]/*, rowsCount: 5000*/);
         var result = Dataset.ConvertDatasetToNormalizedData(dataset);
 
-        return Ok("{" + string.Join("\n", result.Select(kv => kv.Key + "=" + JsonSerializer.Serialize(kv.Value)).ToArray()) + "}");
+        using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "PreparedDataset.txt")))
+        {
+            await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(result));
+        }
+
+        return Ok();
     }
 
     [HttpGet("{functionName}/{areasCount}")]
-    public IActionResult GetTriangle(string functionName, int areasCount)
+    public IActionResult GetFunction(string functionName, int areasCount)
     {
 
         MembershipFunction function;
@@ -66,15 +71,38 @@ public class DatasetController : ControllerBase
         else
             function = new Triangle(0, 1, areasCount);
 
-        var dataset = await Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"], rowsCount: 2000);
-        var normalized = Dataset.ConvertDatasetToNormalizedData(dataset);
+        var normalized = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "PreparedDataset.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
         float[] output = new float[normalized[outputName].Length];
-        float[] outputDistinct = [.. output.Distinct()];
         normalized[outputName].CopyTo(output, 0);
+        float[] outputDistinct = [.. output.Distinct()];
         normalized.Remove(outputName);
 
         var result = FuzzyData.NormalizedDataToFuzzyData(normalized, function);
 
-        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(output));
+        var rules = FuzzyData.GenerateRules(result, outputDistinct);
+
+        using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "RulesBase.txt")))
+        {
+            await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(rules));
+        }
+
+        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(rules));
+    }
+
+    [HttpPost("result")]
+    public async Task<IActionResult> GetResult([FromBody] Dictionary<string, object> input)
+    {
+        MembershipFunction function = new Gauss(0, 1, 5);
+
+        var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        
+
+        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(rules));
     }
 }

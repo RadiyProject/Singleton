@@ -21,18 +21,19 @@ public class FuzzyData
         return result;
     }
 
-    public static Dictionary<string, int[]> GenerateRules(Dictionary<string, float[,]> fuzzificatedInput, float[] distinctOutput)
+    public static Dictionary<string, float[]> GenerateRules(Dictionary<string, float[,]> fuzzificatedInput, float[] distinctOutput)
     {
-        int areasCount = fuzzificatedInput.First().Value.Length - 1;
-        int rulesCount = (int)Math.Pow(areasCount, fuzzificatedInput.Count);
+        int areasCount = fuzzificatedInput.First().Value.GetLength(1) - 1;
+        int rulesCount = (int)Math.Pow(areasCount, fuzzificatedInput.Keys.Count);
         if(distinctOutput.Length > rulesCount)
             throw new InvalidDataException("Количество категорий выходной переменной превышает количество правил. Попробуйте увеличить количество термов.");
 
-        Dictionary<string, int[]> rules = [];
+        Dictionary<string, float[]> rules = [];
+        float[] rule;
 
         int i = 0;
         foreach (KeyValuePair<string, float[,]> column in fuzzificatedInput) {
-            int[] rule = new int[rulesCount];
+            rule = new float[rulesCount];
             int step = (int)Math.Pow(areasCount, i);
             int areaId = -1;
             for (int j = 0; j < rulesCount; j++)
@@ -45,10 +46,36 @@ public class FuzzyData
 
                 rule[j] = areaId;
             }
-            rules[column.Key] = rule;//Сделать мешок значений для случайной подстановки выходного значения, где для каждого значения будет максимальное возможное количество использований (делим количество правил на количество distinctOutput)
+            rules[column.Key] = rule;
 
             i++;
         }
+
+        int[] bag = new int[distinctOutput.Length];
+        int repeatedCount = rulesCount / distinctOutput.Length;
+        int idx = new Random().Next(0, bag.Length);
+        for (i = 0; i < bag.Length; i++)
+        {
+            if (i != idx)
+                bag[i] = repeatedCount;
+            else
+                bag[i] = repeatedCount + rulesCount % distinctOutput.Length;
+
+        }
+
+        rule = new float[rulesCount];
+        for (i = 0; i < rule.Length; i++)
+        {
+            do {
+                idx = new Random().Next(0, bag.Length);
+            } while (bag[idx] <= 0);
+
+            rule[i] = distinctOutput[idx];
+            bag[idx]--;
+
+        }
+        
+        rules["output"] = rule;
 
         return rules;
     }
