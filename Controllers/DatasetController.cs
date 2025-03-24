@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Singleton.Models;
 using Singleton.Models.MembershipFunctions;
@@ -93,7 +92,7 @@ public class DatasetController : ControllerBase
     }
 
     [HttpPost("result")]
-    public async Task<IActionResult> GetResult([FromBody] Dictionary<string, object> input)
+    public async Task<IActionResult> GetResult([FromBody] Dictionary<string, float> input)
     {
         MembershipFunction function = new Gauss(0, 1, 5);
 
@@ -101,8 +100,8 @@ public class DatasetController : ControllerBase
             await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
 
-        
+        var result = new Models.OutputFunctions.Singleton(rules, function).CalculateOutput(input);
 
-        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(rules));
+        return Ok(result);
     }
 }

@@ -1,7 +1,12 @@
+using Singleton.Models.MembershipFunctions;
+
 namespace Singleton.Models.OutputFunctions;
 
-public class Singleton(Dictionary<string, float[]> rules) : OutputFunction(rules)
+public class Singleton(Dictionary<string, float[]> rules, MembershipFunction function) : 
+    OutputFunction(rules, function)
 {
+    protected float MaxValue = 1;
+
     public override float CalculateOutput(Dictionary<string, float> input)
     {
         int ruleLength = rules["output"].Length;
@@ -16,11 +21,11 @@ public class Singleton(Dictionary<string, float[]> rules) : OutputFunction(rules
                 rIdx = i;
             }
         
-        float mij = Multiply(rules, rIdx);
-        float upperMij = mij >= r ? r : mij;
+        float mij = Multiply(rules, input, rIdx);
+        float upperMij = (mij >= r) ? r : mij;
         float downMij = upperMij;
         for(int i = 0; i < ruleLength; i++) {
-            mij = Multiply(rules, i);
+            mij = Multiply(rules, input, i);
             if (mij > downMij)
                 downMij = mij;
         }
@@ -28,12 +33,21 @@ public class Singleton(Dictionary<string, float[]> rules) : OutputFunction(rules
         return upperMij / downMij;
     }
 
-    private static float Multiply(Dictionary<string, float[]> rules, int rIdx)
+    private float Multiply(Dictionary<string, float[]> rules, 
+        Dictionary<string, float> input, int idx)
     {
-        float min = rules.Keys.First()[rIdx];
-        foreach(KeyValuePair<string, float[]> rule in rules)
-            if(min > rule.Value[rIdx])
-                min = rule.Value[rIdx];
+        float min = MaxValue;
+        foreach(KeyValuePair<string, float[]> rule in rules) {
+            if (rule.Key == "output")
+                continue;
+
+            float value = function.CalculateMembershipValue(input[rule.Key], (int)rule.Value[idx]);
+            if (value <= 0.01f) 
+                value = MaxValue;
+
+            if (min > value)
+                min = value;
+        }
 
         return min;
     }
