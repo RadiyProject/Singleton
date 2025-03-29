@@ -132,4 +132,26 @@ public class DatasetController : ControllerBase
 
         return Ok(category);
     }
+
+    [HttpGet("separate")]
+    public async Task<IActionResult> SeparateDataset([FromQuery] float trainProportion)
+    {
+        var normalized = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "PreparedDataset.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var separated = Dataset.Separate(normalized, trainProportion);
+
+        using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "Train.txt")))
+        {
+            await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(separated[0]));
+        }
+
+        using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "Test.txt")))
+        {
+            await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(separated[1]));
+        }
+
+        return Ok("Ok");
+    }
 }

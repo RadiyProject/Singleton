@@ -119,4 +119,60 @@ public class Dataset {
 
         return result;
     }
+
+    public static Dictionary<string, float[]>[] Separate(Dictionary<string, float[]> dataset, float trainProportion) {
+        if (trainProportion > 1 || trainProportion <= 0)
+            throw new InvalidDataException("Доля обучающей выборки задана некорректно");
+
+        int datasetCount = dataset.Values.First().Length;
+        int trainCount = (int)(datasetCount * trainProportion);
+        int testCount = datasetCount - trainCount;
+        Dictionary<string, float[]>[] result = new Dictionary<string, float[]>[2];
+        Dictionary<string, List<float>>[] temp = new Dictionary<string, List<float>>[2];
+        float probability = (float)trainCount / testCount;
+        int idx = 0;
+        while (trainCount > 0 || testCount > 0 || idx > datasetCount) {
+            int set;
+            if (trainCount > 0 && testCount > 0) {
+                set = new Random().Next(0, (int)(2 * probability));
+                if (set > 0)
+                    set = 0;
+                else
+                    set = 1;
+            }
+            else if (trainCount > 0)
+                set = 0;
+            else
+                set = 1;
+
+            CopyRow(dataset, idx, ref temp[set]);
+            if (set == 0) 
+                trainCount--;
+            else
+                testCount--;
+
+            idx++;
+        }
+
+        for(int i = 0; i < result.Length; i++)
+        {
+            result[i] ??= [];
+
+            foreach(KeyValuePair<string, List<float>> column in temp[i])
+                result[i][column.Key] = [.. column.Value];
+        }
+
+        return result;
+    }
+
+    private static void CopyRow(Dictionary<string, float[]> dataset, int idx, ref Dictionary<string, List<float>> set) {
+        set ??= [];
+
+        foreach(KeyValuePair<string, float[]> column in dataset) {
+            if (!set.ContainsKey(column.Key))
+                set[column.Key] = [];
+
+            set[column.Key].Add(column.Value[idx]);
+        }
+    }
 }
