@@ -105,4 +105,18 @@ public class Dataset {
 
         return result;
     }
+
+    public static Dictionary<string, float[]> ConvertOutputToCategories(List<string> values) {
+        Dictionary<string, float[]> result = [];
+        List<float>? convertedColumns = TextTofloat(values);
+        float[] normalized = Normalize([.. convertedColumns]);
+
+        int i = 0;
+        foreach (string column in values) {
+            result[column] = [normalized[i]];
+            i++;
+        }
+
+        return result;
+    }
 }

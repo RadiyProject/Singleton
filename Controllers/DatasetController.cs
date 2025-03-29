@@ -21,6 +21,29 @@ public class DatasetController : ControllerBase
         return Ok();
     }
 
+    [HttpGet("distinct")]
+    public async Task<IActionResult> GetDistinctOutputs()
+    {
+        var dataset = await Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut"]/*, rowsCount: 5000*/);
+        var distincts = dataset.Values.ToArray();
+        List<string>[] distinctOutput = new List<string>[distincts.Length];
+        int i = 0;
+        foreach(List<string> distinct in distincts) 
+        {
+            distinctOutput[i] = [.. distinct.Distinct()];
+            i++;
+        }
+        
+        var result = Dataset.ConvertOutputToCategories(distinctOutput[0]);
+
+        using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "PreparedDistinct.txt")))
+        {
+            await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(result));
+        }
+
+        return Ok();
+    }
+
     [HttpGet("{functionName}/{areasCount}")]
     public IActionResult GetFunction(string functionName, int areasCount)
     {
@@ -100,8 +123,13 @@ public class DatasetController : ControllerBase
             await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
 
-        var result = new Models.OutputFunctions.Singleton(rules, function).CalculateOutput(input);
+        var distinct = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "PreparedDistinct.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
 
-        return Ok(result);
+        var result = new Models.OutputFunctions.Singleton(rules, function, 1).CalculateOutput(input);
+        var category = Models.OutputFunctions.Singleton.DefuzzToCategory(result, distinct);
+
+        return Ok(category);
     }
 }

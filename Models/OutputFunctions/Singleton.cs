@@ -2,10 +2,9 @@ using Singleton.Models.MembershipFunctions;
 
 namespace Singleton.Models.OutputFunctions;
 
-public class Singleton(Dictionary<string, float[]> rules, MembershipFunction function) : 
-    OutputFunction(rules, function)
+public class Singleton(Dictionary<string, float[]> rules, MembershipFunction function, float upperBorder) : 
+    OutputFunction(rules, function, upperBorder)
 {
-    protected float MaxValue = 1;
 
     public override float CalculateOutput(Dictionary<string, float> input)
     {
@@ -36,19 +35,36 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
     private float Multiply(Dictionary<string, float[]> rules, 
         Dictionary<string, float> input, int idx)
     {
-        float min = MaxValue;
+        float min = upperBorder;
         foreach(KeyValuePair<string, float[]> rule in rules) {
             if (rule.Key == "output")
                 continue;
 
             float value = function.CalculateMembershipValue(input[rule.Key], (int)rule.Value[idx]);
             if (value <= 0.01f) 
-                value = MaxValue;
+                value = upperBorder;
 
             if (min > value)
                 min = value;
         }
 
         return min;
+    }
+
+    public static string DefuzzToCategory(float value, Dictionary<string, float[]> distinctOutputs)
+    {
+        float diff = (float)Math.Abs(value - distinctOutputs.Values.First()[0]);
+        string name = distinctOutputs.Keys.First();
+        foreach(KeyValuePair<string, float[]> distinctOutput in distinctOutputs)
+        {
+            float tempDiff = (float)Math.Abs(value - distinctOutput.Value[0]);
+            if (diff > tempDiff)
+            {
+                diff = tempDiff;
+                name = distinctOutput.Key;
+            }
+        }
+
+        return name;
     }
 }

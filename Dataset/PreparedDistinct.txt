@@ -1,0 +1,1 @@
+{"Fair":[0.0],"Good":[0.25],"Ideal":[0.5],"Premium":[0.75],"Very Good":[1.0]}
