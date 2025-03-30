@@ -10,4 +10,13 @@ public class Gauss(float leftBorder, float rightBorder, int areasCount) : Member
         float sigma = (borders[1] - center) * 0.333334f;
         return (float)Math.Exp(-(value - center) * (value - center) * 0.5f / (sigma * sigma));
     }
+
+    protected override float DerivativeFunctionRule(float value, float[] borders)
+    {
+        CheckBorders(borders, "функции Гаусса");
+
+        float center = (borders[1] - borders[0]) * 0.5f + borders[0];
+        float sigma = (borders[1] - center) * 0.333334f;
+        return FunctionRule(value, borders) * (value - center) / (sigma * sigma);
+    }
 }

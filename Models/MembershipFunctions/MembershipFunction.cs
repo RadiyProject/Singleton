@@ -37,6 +37,16 @@ public abstract class MembershipFunction
         return FunctionRule(element, borders);
     }
 
+    public float CalculateDerivativeMembershipValue(float element, int areaId)
+    {
+        float[] borders = new float[areas.GetLength(1)];
+
+        for (int i = 0; i < borders.Length; i++)
+            borders[i] = areas[areaId, i];
+        
+        return DerivativeFunctionRule(element, borders);
+    }
+
     protected float[,] DivideIntoMultipleAreas(int areasCount)
     {
         float[,] result = new float[areasCount, pointsCount];
@@ -56,6 +66,8 @@ public abstract class MembershipFunction
     }
 
     protected abstract float FunctionRule(float value, float[] borders); 
+
+    protected abstract float DerivativeFunctionRule(float value, float[] borders); 
 
     protected void CheckBorders(float[] borders, string functionName = "функции") 
     {

@@ -13,4 +13,16 @@ public class Trapezoid(float leftBorder, float rightBorder, int areasCount) : Me
             _ => 0
         };
     }
+
+    protected override float DerivativeFunctionRule(float value, float[] borders)
+    {
+        CheckBorders(borders, "трапеции");
+
+        return true switch
+        {
+            true when value >= borders[0] && value <= borders[1] => 1f / (borders[1] - borders[0]),
+            true when value >= borders[2] && value <= borders[3] => -1f / (borders[3] - borders[2]),
+            _ => 0
+        };
+    }
 }

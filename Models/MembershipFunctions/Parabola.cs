@@ -12,4 +12,16 @@ public class Parabola(float leftBorder, float rightBorder, int areasCount) : Mem
             _ => 1
         };
     }
+
+    protected override float DerivativeFunctionRule(float value, float[] borders)
+    {
+        CheckBorders(borders, "параболы");
+
+        return true switch
+        {
+            true when value >= borders[0] && value <= borders[1] => -2f * (value - borders[0]) / (float)Math.Pow(borders[1] - borders[0], 2),
+            true when value >= borders[1] && value <= borders[2] => 2f * (borders[1] - value) / (float)Math.Pow(borders[2] - borders[1], 2),
+            _ => 0
+        };
+    }
 }
