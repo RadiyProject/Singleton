@@ -139,6 +139,9 @@ public class Dataset {
                     set = 0;
                 else
                     set = 1;
+
+                if (probability < 1)
+                    set = set == 1 ? 0 : 1;
             }
             else if (trainCount > 0)
                 set = 0;

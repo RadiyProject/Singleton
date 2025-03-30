@@ -124,7 +124,7 @@ public class DatasetController : ControllerBase
                 ?? throw new InvalidDataException();
 
         var distinct = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
-            await new StreamReader(Path.Combine("/app/Dataset", "PreparedDistinct.txt")).ReadToEndAsync()) 
+            await new StreamReader(Path.Combine("/app/Dataset", "Train.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
 
         var result = new Models.OutputFunctions.Singleton(rules, function, 1).CalculateOutput(input);
