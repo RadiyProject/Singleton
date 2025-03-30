@@ -210,4 +210,31 @@ public class DatasetController : ControllerBase
 
         return Ok(category);
     }
+
+    [HttpPost("train")]
+    public async Task<IActionResult> Train([FromQuery] int epochsCount = 5)
+    {
+        MembershipFunction function = new Gauss(0, 1, 5);
+
+        var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var weights = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "Weights.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "TrainReduced.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        weights = new GradientDescent().Train(rules, weights, dataset, function, "cut", epochsCount);
+
+        using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "Weights.txt")))
+        {
+            await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(weights));
+        }
+
+        return Ok("Ok");
+    }
 }

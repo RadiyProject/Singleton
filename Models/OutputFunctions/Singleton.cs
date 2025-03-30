@@ -5,7 +5,6 @@ namespace Singleton.Models.OutputFunctions;
 public class Singleton(Dictionary<string, float[]> rules, MembershipFunction function, float upperBorder, Dictionary<string, float[]>? weights = null) : 
     OutputFunction(rules, function, upperBorder, weights)
 {
-
     public override float CalculateOutput(Dictionary<string, float> input)
     {
         int ruleLength = rules["output"].Length;
@@ -30,6 +29,28 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
         }
         
         return upperMij / downMij;
+    }
+
+    public (int, float) GetR()
+    {
+        int ruleLength = rules["output"].Length;
+        if (ruleLength == 0)
+            throw new InvalidDataException("База правил пуста");
+
+        float r = rules["output"][0] * (weights != null ? weights["output"][0] : 1);
+        int rIdx = 0;
+        for(int i = 1; i < ruleLength; i++)
+            if (rules["output"][i] > r) {
+                r = rules["output"][i];
+                rIdx = i;
+            }
+        
+        return (rIdx, r);
+    }
+
+    public float GetDegree(Dictionary<string, float> input, int rIdx)
+    {   
+        return Multiply(rules, input, rIdx, weights);
     }
 
     private float Multiply(Dictionary<string, float[]> rules, 

@@ -13,4 +13,9 @@ public class StandardDeviation() : Deviation
 
         return (float)Math.Sqrt(sum / realOut.Count);
     }
+
+    public float CalculateRow(float realOut, float expectedOut)
+    {
+        return (realOut - expectedOut) * (realOut - expectedOut);
+    }
 }
