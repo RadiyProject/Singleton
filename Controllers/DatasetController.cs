@@ -125,7 +125,7 @@ public class DatasetController : ControllerBase
                 ?? throw new InvalidDataException();
 
         var distinct = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
-            await new StreamReader(Path.Combine("/app/Dataset", "Train.txt")).ReadToEndAsync()) 
+            await new StreamReader(Path.Combine("/app/Dataset", "PreparedDistinct.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
 
         var result = new Models.OutputFunctions.Singleton(rules, function, 1).CalculateOutput(input);
@@ -151,6 +151,22 @@ public class DatasetController : ControllerBase
         using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "Test.txt")))
         {
             await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(separated[1]));
+        }
+
+        return Ok("Ok");
+    }
+
+    [HttpGet("reduce")]
+    public async Task<IActionResult> ReduceDataset([FromQuery] float reduceValue, [FromQuery] string fileName="Train")
+    {
+        var dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", $"{fileName}.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var reduced = Dataset.Reduce(dataset, reduceValue);
+        using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", $"{fileName}Reduced.txt")))
+        {
+            await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(reduced));
         }
 
         return Ok("Ok");
@@ -182,7 +198,7 @@ public class DatasetController : ControllerBase
                 ?? throw new InvalidDataException();
 
         var distinct = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
-            await new StreamReader(Path.Combine("/app/Dataset", "Train.txt")).ReadToEndAsync()) 
+            await new StreamReader(Path.Combine("/app/Dataset", "PreparedDistinct.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
 
         var weights = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(

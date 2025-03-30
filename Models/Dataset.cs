@@ -131,7 +131,7 @@ public class Dataset {
         Dictionary<string, List<float>>[] temp = new Dictionary<string, List<float>>[2];
         float probability = (float)trainCount / testCount;
         int idx = 0;
-        while (trainCount > 0 || testCount > 0 || idx > datasetCount) {
+        while (trainCount > 0 || testCount > 0) {
             int set;
             if (trainCount > 0 && testCount > 0) {
                 set = new Random().Next(0, (int)(2 * probability));
@@ -177,5 +177,23 @@ public class Dataset {
 
             set[column.Key].Add(column.Value[idx]);
         }
+    }
+
+    public static Dictionary<string, float[]> Reduce(Dictionary<string, float[]> dataset, float reduceValue) {
+        if (reduceValue >= 1 || reduceValue <= 0)
+            throw new InvalidDataException("Коэффициент для сокращения датасета указан неверно");
+
+        int datasetCount = dataset.Values.First().Length;
+        int resultCount = (int)(datasetCount * reduceValue);
+        int step = datasetCount / resultCount;
+        Dictionary<string, float[]> result = [];
+        Dictionary<string, List<float>> temp = [];
+        for (int i = 0; i < datasetCount; i += step)
+            CopyRow(dataset, i, ref temp);
+
+        foreach(KeyValuePair<string, List<float>> column in temp)
+            result[column.Key] = [.. column.Value];
+
+        return result;
     }
 }
