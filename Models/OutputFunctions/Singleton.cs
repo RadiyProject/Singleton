@@ -53,6 +53,28 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
         return Multiply(rules, input, rIdx, weights);
     }
 
+    public float GetDerivated(Dictionary<string, float> input, int rIdx)
+    {   
+        return Add(rules, input, rIdx, weights);
+    }
+
+    private float Add(Dictionary<string, float[]> rules, 
+        Dictionary<string, float> input, int idx, Dictionary<string, float[]>? weights = null)
+    {
+        float max = 0;
+        foreach(KeyValuePair<string, float[]> rule in rules) {
+            if (rule.Key == "output")
+                continue;
+
+            float value = function.CalculateDerivativeMembershipValue(input[rule.Key] + (weights != null ? weights[rule.Key][idx] : 0), (int)rule.Value[idx]);
+
+            if (max < value)
+                max = value;
+        }
+
+        return max;
+    }
+
     private float Multiply(Dictionary<string, float[]> rules, 
         Dictionary<string, float> input, int idx, Dictionary<string, float[]>? weights = null)
     {

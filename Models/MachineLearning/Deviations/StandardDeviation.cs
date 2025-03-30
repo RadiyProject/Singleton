@@ -18,4 +18,9 @@ public class StandardDeviation() : Deviation
     {
         return (realOut - expectedOut) * (realOut - expectedOut);
     }
+
+    public float DerivativeCalculateRow(float realOut, float expectedOut)
+    {
+        return 2f * (realOut - expectedOut);
+    }
 }
