@@ -74,11 +74,11 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
 
     public static string DefuzzToCategory(float value, Dictionary<string, float[]> distinctOutputs)
     {
-        float diff = (float)Math.Abs(value - distinctOutputs.Values.First()[0]);
+        float diff = MathF.Abs(value - distinctOutputs.Values.First()[0]);
         string name = distinctOutputs.Keys.First();
         foreach(KeyValuePair<string, float[]> distinctOutput in distinctOutputs)
         {
-            float tempDiff = (float)Math.Abs(value - distinctOutput.Value[0]);
+            float tempDiff = MathF.Abs(value - distinctOutput.Value[0]);
             if (diff > tempDiff)
             {
                 diff = tempDiff;

@@ -9,7 +9,7 @@ public class AverageAbsoluteDeviation() : Deviation
 
         float sum = 0;
         foreach(var(real, expected) in realOut.Zip(expectedOut, (x, y) => (real: x, expected: y)))
-            sum += Math.Abs(real - expected);
+            sum += MathF.Abs(real - expected);
 
         return sum / realOut.Count;
     }
