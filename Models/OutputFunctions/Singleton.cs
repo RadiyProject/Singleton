@@ -2,8 +2,8 @@ using Singleton.Models.MembershipFunctions;
 
 namespace Singleton.Models.OutputFunctions;
 
-public class Singleton(Dictionary<string, float[]> rules, MembershipFunction function, float upperBorder) : 
-    OutputFunction(rules, function, upperBorder)
+public class Singleton(Dictionary<string, float[]> rules, MembershipFunction function, float upperBorder, Dictionary<string, float[]>? weights = null) : 
+    OutputFunction(rules, function, upperBorder, weights)
 {
 
     public override float CalculateOutput(Dictionary<string, float> input)
@@ -12,7 +12,7 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
         if (ruleLength == 0)
             throw new InvalidDataException("База правил пуста");
 
-        float r = rules["output"][0];
+        float r = rules["output"][0] * (weights != null ? weights["output"][0] : 1);
         int rIdx = 0;
         for(int i = 1; i < ruleLength; i++)
             if (rules["output"][i] > r) {
@@ -20,11 +20,11 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
                 rIdx = i;
             }
         
-        float mij = Multiply(rules, input, rIdx);
+        float mij = Multiply(rules, input, rIdx, weights);
         float upperMij = (mij >= r) ? r : mij;
         float downMij = upperMij;
         for(int i = 0; i < ruleLength; i++) {
-            mij = Multiply(rules, input, i);
+            mij = Multiply(rules, input, i, weights);
             if (mij > downMij)
                 downMij = mij;
         }
@@ -33,14 +33,14 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
     }
 
     private float Multiply(Dictionary<string, float[]> rules, 
-        Dictionary<string, float> input, int idx)
+        Dictionary<string, float> input, int idx, Dictionary<string, float[]>? weights = null)
     {
         float min = upperBorder;
         foreach(KeyValuePair<string, float[]> rule in rules) {
             if (rule.Key == "output")
                 continue;
 
-            float value = function.CalculateMembershipValue(input[rule.Key], (int)rule.Value[idx]);
+            float value = function.CalculateMembershipValue(input[rule.Key] + (weights != null ? weights[rule.Key][idx] : 0), (int)rule.Value[idx]);
             if (value <= 0.01f) 
                 value = upperBorder;
 

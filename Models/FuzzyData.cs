@@ -79,6 +79,4 @@ public class FuzzyData
 
         return rules;
     }
-
-    //Разделять данные на тестовую и обучающую выборки
 }

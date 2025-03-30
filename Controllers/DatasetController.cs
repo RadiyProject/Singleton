@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Singleton.Models;
+using Singleton.Models.MachineLearning;
 using Singleton.Models.MembershipFunctions;
 
 namespace Singleton.Controllers;
@@ -153,5 +154,44 @@ public class DatasetController : ControllerBase
         }
 
         return Ok("Ok");
+    }
+
+    [HttpGet("weights")]
+    public async Task<IActionResult> GenerateWeights()
+    {
+        var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var weights = Weights.Generate(rules);
+        using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "Weights.txt")))
+        {
+            await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(weights));
+        }
+
+        return Ok("Ok");
+    }
+
+    [HttpPost("weights/result")]
+    public async Task<IActionResult> GetResultWithWeights([FromBody] Dictionary<string, float> input)
+    {
+        MembershipFunction function = new Gauss(0, 1, 5);
+
+        var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var distinct = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "Train.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var weights = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "Weights.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var result = new Models.OutputFunctions.Singleton(rules, function, 1, weights).CalculateOutput(input);
+        var category = Models.OutputFunctions.Singleton.DefuzzToCategory(result, distinct);
+
+        return Ok(category);
     }
 }
