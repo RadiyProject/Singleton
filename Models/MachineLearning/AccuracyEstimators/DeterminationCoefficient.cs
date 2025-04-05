@@ -4,7 +4,7 @@ public class DeterminationCoefficient
 {
     public float Calculate(List<float> realOut, List<float> expectedOut)
     {
-        if (realOut.Count != expectedOut.Count)
+        if (realOut.Count != expectedOut.Count || realOut.Count == 0)
             throw new InvalidDataException("Количество ожидаемых и фактических выходов различается");
 
         float meanExpected = 0;
@@ -18,6 +18,8 @@ public class DeterminationCoefficient
             sumUpper += (real - expected) * (real - expected);
             sumLower += (meanExpected - expected) * (meanExpected - expected);
         }
+
+        //Console.WriteLine(sumUpper + " " + sumLower);
 
         return 1 - sumUpper / sumLower;
     }
