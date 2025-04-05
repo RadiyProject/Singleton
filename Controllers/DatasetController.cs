@@ -118,7 +118,7 @@ public class DatasetController : ControllerBase
     [HttpPost("result")]
     public async Task<IActionResult> GetResult([FromBody] Dictionary<string, float> input)
     {
-        MembershipFunction function = new Gauss(0, 1, 5);
+        MembershipFunction function = new Gauss(0, 1, 10);
 
         var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
             await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
@@ -191,7 +191,7 @@ public class DatasetController : ControllerBase
     [HttpPost("weights/result")]
     public async Task<IActionResult> GetResultWithWeights([FromBody] Dictionary<string, float> input)
     {
-        MembershipFunction function = new Gauss(0, 1, 5);
+        MembershipFunction function = new Gauss(0, 1, 10);
 
         var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
             await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
@@ -214,7 +214,7 @@ public class DatasetController : ControllerBase
     [HttpPost("train")]
     public async Task<IActionResult> Train([FromQuery] int epochsCount = 5)
     {
-        MembershipFunction function = new Gauss(0, 1, 5);
+        MembershipFunction function = new Gauss(0, 1, 10);
 
         var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
             await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 

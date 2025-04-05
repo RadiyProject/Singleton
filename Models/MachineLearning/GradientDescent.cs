@@ -9,9 +9,11 @@ public class GradientDescent
         Dictionary<string, float[]> dataset, MembershipFunction function, string outputName, 
         int epochsCount = 5, float learnCoeff = 2) 
     {
-        float learningRate = 0.5f;
+        float learningRate = 0.0001f;
         for (int epoch = 0; epoch < epochsCount; epoch++) {
-            learningRate /= 1 + learnCoeff * epoch;
+            //if (epoch > 1)
+            //    learningRate /= 1 + learnCoeff * epoch;
+            float error = 0;
 
             for (int row = 0; row < dataset.Values.First().Length; row++) {
                 var singleton = new OutputFunctions.Singleton(rules, function, 1, weights);
@@ -32,14 +34,14 @@ public class GradientDescent
 
                 float result = upperMij / lowerMij;
                 float deviation = new StandardDeviation().DerivativeCalculateRow(result, dataset[outputName][row]);
-                float error = new StandardDeviation().CalculateRow(result, dataset[outputName][row]);
-                Console.WriteLine($"Error: {error}. Epochs: {epoch}. Row: {row}");
+                error += new StandardDeviation().CalculateRow(result, dataset[outputName][row]);
+                //Console.WriteLine($"Error: {error}. Epochs: {epoch}. Row: {row}");
 
                 for (int i = 0; i < wj.Length; i++)
-                    if (wj[i] > 0.1f)//Порог срабатывания
-                        weights["output"][i] -= learningRate * deviation * rules["output"][i] * wj[i] / lowerMij;
+                    //if (wj[i] > 0.1f)//Порог срабатывания
+                        weights["output"][i] -= learningRate * deviation * ((rules["output"][i] < wj[i] ? rules["output"][i] : wj[i]) / lowerMij);
                     
-                for (int i = 0; i < wj.Length; i++)
+                /*for (int i = 0; i < wj.Length; i++)
                     foreach (KeyValuePair<string, float[]> rule in rules)
                         if (wj[i] > 0.1f) {//Порог срабатывания
                             Dictionary<string, float> input = [];
@@ -48,8 +50,9 @@ public class GradientDescent
 
                             float wjD = singleton.GetDerivated(input, i);
                             weights[rule.Key][i] -= learningRate * deviation * (rules["output"][i] > wjD ? rules["output"][i] : wjD) / lowerMij;
-                        }
+                        }*/
             }
+            Console.WriteLine($"Error: {error / dataset.Values.First().Length}. Epochs: {epoch}");
         }
 
         return weights;

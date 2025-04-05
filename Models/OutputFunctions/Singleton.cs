@@ -14,8 +14,8 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
         float r = rules["output"][0] * (weights != null ? weights["output"][0] : 1);
         int rIdx = 0;
         for(int i = 1; i < ruleLength; i++)
-            if (rules["output"][i] > r) {
-                r = rules["output"][i];
+            if (rules["output"][i] * (weights != null ? weights["output"][i] : 1) > r) {
+                r = rules["output"][i] * (weights != null ? weights["output"][i] : 1);
                 rIdx = i;
             }
         
@@ -40,8 +40,8 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
         float r = rules["output"][0] * (weights != null ? weights["output"][0] : 1);
         int rIdx = 0;
         for(int i = 1; i < ruleLength; i++)
-            if (rules["output"][i] > r) {
-                r = rules["output"][i];
+            if (rules["output"][i] * (weights != null ? weights["output"][i] : 1) > r) {
+                r = rules["output"][i] * (weights != null ? weights["output"][i] : 1);
                 rIdx = i;
             }
         
