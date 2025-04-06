@@ -8,44 +8,68 @@ public class GradientDescent
 {
     public Dictionary<string, float[]> Train(Dictionary<string, float[]> rules, Dictionary<string, float[]> weights, 
         Dictionary<string, float[]> dataset, MembershipFunction function, string outputName, 
-        int epochsCount = 5, float learnCoeff = 2) 
+        int epochsCount = 5) 
     {
-        float learningRate = 0.0001f;
+        float learningRate = 0.0003f;
         List<float> realOut = []; List<float> expectedOut = [];
+        int batchCount = 10;
         for (int epoch = 0; epoch < epochsCount; epoch++) {
             //if (epoch > 1)
             //    learningRate /= 1 + learnCoeff * epoch;
             float error = 0;
             bool isLast = epoch == epochsCount - 1;
 
-            for (int row = 0; row < dataset.Values.First().Length; row++) {
-                var singleton = new OutputFunctions.Singleton(rules, function, 1, weights);
-                float[] wj = new float[rules.Values.First().Length];
-                (int, float) r = singleton.GetR();
-                float lowerMij = 0;
+            Dictionary<string, float[]>[] batchedDataset = new Dictionary<string, float[]>[batchCount];
+            Dictionary<string, List<float>>[] tempBatches = new Dictionary<string, List<float>>[batchCount];
+            foreach(KeyValuePair<string, float[]> column in dataset)
+                for(int i = 0; i < column.Value.Length; i++) {
+                    int currentIdx = new Random().Next(0, batchCount);
+                    if (!tempBatches[currentIdx].ContainsKey(column.Key))
+                        tempBatches[currentIdx][column.Key] = [];
 
-                for (int i = 0; i < wj.Length; i++) {
-                    Dictionary<string, float> input = [];
-                    foreach(KeyValuePair<string, float[]> column in dataset)
-                        input[column.Key == outputName ? "output" : column.Key] = column.Value[row];
-
-                    wj[i] = singleton.GetDegree(input, i);
-                    if (wj[i] > lowerMij)
-                        lowerMij = wj[i];
+                    tempBatches[currentIdx][column.Key].Add(column.Value[i]);
                 }
-                float upperMij = (wj[r.Item1] >= r.Item2) ? r.Item2 : wj[r.Item1];
 
-                float result = upperMij / lowerMij;
-                if (isLast) {
-                    realOut.Add(result);
-                    expectedOut.Add(dataset[outputName][row]);
+            for (int batch = 0; batch < batchCount; batch++) 
+                foreach(KeyValuePair<string, List<float>> column in tempBatches[batch])
+                    batchedDataset[batch][column.Key] = [.. tempBatches[batch][column.Key]];
+
+            for (int batch = 0; batch < batchCount; batch++) {
+                float deviation = 0;
+                float[] gradients = new float[weights["output"].Length];
+                int batchLength = batchedDataset[batch].Values.First().Length;
+
+                for (int row = 0; row < batchLength; row++) {
+                    var singleton = new OutputFunctions.Singleton(rules, function, 1, weights);
+                    float[] wj = new float[rules.Values.First().Length];
+                    (int, float) r = singleton.GetR();
+                    float lowerMij = 0;
+
+                    for (int i = 0; i < wj.Length; i++) {
+                        Dictionary<string, float> input = [];
+                        foreach(KeyValuePair<string, float[]> column in batchedDataset[batch])
+                            input[column.Key == outputName ? "output" : column.Key] = column.Value[row];
+
+                        wj[i] = singleton.GetDegree(input, i);
+                        if (wj[i] > lowerMij)
+                            lowerMij = wj[i];
+                    }
+                    float upperMij = (wj[r.Item1] >= r.Item2) ? r.Item2 : wj[r.Item1];
+
+                    float result = upperMij / lowerMij;
+                    if (isLast) {
+                        realOut.Add(result);
+                        expectedOut.Add(dataset[outputName][row]);
+                    }
+                    deviation += new StandardDeviation().DerivativeCalculateRow(result, dataset[outputName][row]);
+                    error += new StandardDeviation().CalculateRow(result, dataset[outputName][row]);
+                    //Console.WriteLine($"Error: {error}. Epochs: {epoch}. Row: {row}");
+
+                    for (int i = 0; i < wj.Length; i++)
+                        gradients[i] += learningRate * deviation * ((rules["output"][i] < wj[i] ? rules["output"][i] : wj[i]) / lowerMij);
                 }
-                float deviation = new StandardDeviation().DerivativeCalculateRow(result, dataset[outputName][row]);
-                error += new StandardDeviation().CalculateRow(result, dataset[outputName][row]);
-                //Console.WriteLine($"Error: {error}. Epochs: {epoch}. Row: {row}");
-
-                for (int i = 0; i < wj.Length; i++)
-                        weights["output"][i] -= learningRate * deviation * ((rules["output"][i] < wj[i] ? rules["output"][i] : wj[i]) / lowerMij);
+                for (int i = 0; i < gradients.Length; i++)
+                    weights["output"][i] -= gradients[i] / batchLength;
             }
             Console.WriteLine($"Error: {error / dataset.Values.First().Length}. Epochs: {epoch}");
             if (isLast)

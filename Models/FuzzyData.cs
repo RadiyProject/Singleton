@@ -49,7 +49,7 @@ public class FuzzyData
             i++;
         }
 
-        int[] bag = new int[distinctOutput.Length];
+        /*int[] bag = new int[distinctOutput.Length];
         int repeatedCount = rulesCount / distinctOutput.Length;
         int idx = new Random().Next(0, bag.Length);
         for (i = 0; i < bag.Length; i++)
@@ -59,7 +59,7 @@ public class FuzzyData
             else
                 bag[i] = repeatedCount + rulesCount % distinctOutput.Length;
 
-        }
+        }*/
 
         rule = new float[rulesCount];
         for (i = 0; i < rule.Length; i++)

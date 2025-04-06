@@ -8,7 +8,7 @@ namespace Singleton.Controllers;
 [ApiController]
 public class DatasetController : ControllerBase
 {
-    private readonly MembershipFunction function = new Gauss(0, 1, 10);
+    private readonly MembershipFunction function = new Gauss(0, 1, 7);
 
     [HttpGet("")]
     public async Task<IActionResult> GetFile()

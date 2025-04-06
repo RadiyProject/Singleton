@@ -19,11 +19,11 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
                 rIdx = i;
             }
         
-        float mij = Multiply(rules, input, rIdx, weights);
+        float mij = Multiply(rules, input, rIdx);
         float upperMij = (mij >= r) ? r : mij;
         float downMij = upperMij;
         for(int i = 0; i < ruleLength; i++) {
-            mij = Multiply(rules, input, i, weights);
+            mij = Multiply(rules, input, i);
             if (mij > downMij)
                 downMij = mij;
         }
@@ -50,7 +50,7 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
 
     public float GetDegree(Dictionary<string, float> input, int rIdx)
     {   
-        return Multiply(rules, input, rIdx, weights);
+        return Multiply(rules, input, rIdx);
     }
 
     public float GetDerivated(Dictionary<string, float> input, int rIdx)
@@ -76,14 +76,14 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
     }
 
     private float Multiply(Dictionary<string, float[]> rules, 
-        Dictionary<string, float> input, int idx, Dictionary<string, float[]>? weights = null)
+        Dictionary<string, float> input, int idx)
     {
         float min = upperBorder;
         foreach(KeyValuePair<string, float[]> rule in rules) {
             if (rule.Key == "output")
                 continue;
 
-            float value = function.CalculateMembershipValue(input[rule.Key] + (weights != null ? weights[rule.Key][idx] : 0), (int)rule.Value[idx]);
+            float value = function.CalculateMembershipValue(input[rule.Key], (int)rule.Value[idx]);
             if (value <= 0.01f) 
                 value = upperBorder;
 
