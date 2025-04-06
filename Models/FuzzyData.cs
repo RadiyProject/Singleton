@@ -25,8 +25,6 @@ public class FuzzyData
     {
         int areasCount = fuzzificatedInput.First().Value.GetLength(1) - 1;
         int rulesCount = (int)Math.Pow(areasCount, fuzzificatedInput.Keys.Count);
-        if(distinctOutput.Length > rulesCount)
-            throw new InvalidDataException("Количество категорий выходной переменной превышает количество правил. Попробуйте увеличить количество термов.");
 
         Dictionary<string, float[]> rules = [];
         float[] rule;
@@ -66,13 +64,13 @@ public class FuzzyData
         rule = new float[rulesCount];
         for (i = 0; i < rule.Length; i++)
         {
-            do {
+            /*do {
                 idx = new Random().Next(0, bag.Length);
             } while (bag[idx] <= 0);
 
             rule[i] = distinctOutput[idx];
-            bag[idx]--;
-
+            bag[idx]--;*/
+            rule[i] = 1;
         }
         
         rules["output"] = rule;

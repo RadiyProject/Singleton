@@ -8,6 +8,8 @@ namespace Singleton.Controllers;
 [ApiController]
 public class DatasetController : ControllerBase
 {
+    private readonly MembershipFunction function = new Gauss(0, 1, 10);
+
     [HttpGet("")]
     public async Task<IActionResult> GetFile()
     {
@@ -81,19 +83,9 @@ public class DatasetController : ControllerBase
         return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(resultResult));
     }
 
-    [HttpGet("calculate/{functionName}/{areasCount}/{outputName}")]
-    public async Task<IActionResult> Calculate(string functionName, int areasCount, string outputName)
+    [HttpGet("calculate/{outputName}")]
+    public async Task<IActionResult> Calculate(string outputName)
     {
-        MembershipFunction function;
-        if (functionName == "trapezoid")
-            function = new Trapezoid(0, 1, areasCount);
-        else if (functionName == "parabola")
-            function = new Parabola(0, 1, areasCount);
-        else if (functionName == "gauss")
-            function = new Gauss(0, 1, areasCount);
-        else
-            function = new Triangle(0, 1, areasCount);
-
         var normalized = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
             await new StreamReader(Path.Combine("/app/Dataset", "PreparedDataset.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
@@ -112,14 +104,12 @@ public class DatasetController : ControllerBase
             await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(rules));
         }
 
-        return Ok(Newtonsoft.Json.JsonConvert.SerializeObject(rules));
+        return Ok("Ok");
     }
 
     [HttpPost("result")]
     public async Task<IActionResult> GetResult([FromBody] Dictionary<string, float> input)
     {
-        MembershipFunction function = new Gauss(0, 1, 10);
-
         var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
             await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
@@ -191,8 +181,6 @@ public class DatasetController : ControllerBase
     [HttpPost("weights/result")]
     public async Task<IActionResult> GetResultWithWeights([FromBody] Dictionary<string, float> input)
     {
-        MembershipFunction function = new Gauss(0, 1, 10);
-
         var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
             await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
@@ -214,8 +202,6 @@ public class DatasetController : ControllerBase
     [HttpPost("train")]
     public async Task<IActionResult> Train([FromQuery] int epochsCount = 5)
     {
-        MembershipFunction function = new Gauss(0, 1, 10);
-
         var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
             await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
