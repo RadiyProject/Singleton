@@ -10,11 +10,11 @@ public class GradientDescent
         Dictionary<string, float[]> dataset, MembershipFunction function, string outputName, 
         int epochsCount = 5) 
     {
-        float startLearningRate = 0.01f;
-        float attenuationCoef = 0.8f;
+        float startLearningRate = 0.015f;
+        float attenuationCoef = 0.95f;
         float learningRate = startLearningRate;
         List<float> realOut = []; List<float> expectedOut = [];
-        int batchCount = 6;
+        int batchCount = 50;
 
         float momentum = 0.9f;
         float[] velocity = new float[weights["output"].Length];
@@ -73,22 +73,22 @@ public class GradientDescent
                         realOut.Add(result);
                         expectedOut.Add(dataset[outputName][row]);
                     }*/
-                    deviation += new StandardDeviation().DerivativeCalculateRow(result, dataset[outputName][row]);
-                    error += new StandardDeviation().CalculateRow(result, dataset[outputName][row]);
+                    deviation += new StandardDeviation().DerivativeCalculateRow(result, batchedDataset[batch][outputName][row]);
+                    error += new StandardDeviation().CalculateRow(result, batchedDataset[batch][outputName][row]);
 
                     for (int i = 0; i < wj.Length; i++)
                         gradients[i] += learningRate * deviation * ((rules["output"][i] < wj[i] ? rules["output"][i] : wj[i]) / lowerMij);
                 });
                 for (int i = 0; i < gradients.Length; i++) {
                     weights["output"][i] -= gradients[i] / batchLength;
-                    if (weights["output"][i] > 1)
+                    /*if (weights["output"][i] > 1)
                         weights["output"][i] = 1;
 
                     if (weights["output"][i] < 0)
-                        weights["output"][i] = 0;
+                        weights["output"][i] = 0;*/
                 }
             }
-            Console.WriteLine($"Error: {MathF.Sqrt(error / dataset.Values.First().Length)}. Error^2: {error / dataset.Values.First().Length}. Epochs: {epoch}");
+            Console.WriteLine($"Error: {MathF.Sqrt(error / batchedDataset[batch].Values.First().Length)}. Error^2: {error / batchedDataset[batch].Values.First().Length}. Epochs: {epoch}");
             //if (isLast)
             //    Console.WriteLine($"Overall accuracy: {new DeterminationCoefficient().Calculate(realOut, expectedOut)}.");
 
