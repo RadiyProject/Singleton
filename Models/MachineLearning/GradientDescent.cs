@@ -10,11 +10,16 @@ public class GradientDescent
         Dictionary<string, float[]> dataset, MembershipFunction function, string outputName, 
         int epochsCount = 5) 
     {
-        float learningRate = 0.01f;
+        float startLearningRate = 0.01f;
+        float attenuationCoef = 0.8f;
+        float learningRate = startLearningRate;
         List<float> realOut = []; List<float> expectedOut = [];
         int batchCount = 6;
 
-        int autosaveCount = 5;
+        float momentum = 0.9f;
+        float[] velocity = new float[weights["output"].Length];
+
+        int autosaveCount = 20;
         for (int epoch = 0; epoch < epochsCount; epoch++) {
             float error = 0;
             //bool isLast = epoch == epochsCount - 1;
@@ -87,10 +92,12 @@ public class GradientDescent
             //if (isLast)
             //    Console.WriteLine($"Overall accuracy: {new DeterminationCoefficient().Calculate(realOut, expectedOut)}.");
 
-            if (epoch % autosaveCount == 0 && epoch > 0) {
+            if ((epoch + 1) % autosaveCount == 0 && epoch > 0) {
                 using StreamWriter outputFile = new(Path.Combine("/app/Dataset", "Weights.txt"));
                 await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(weights));
             }
+
+            learningRate = startLearningRate * MathF.Pow(attenuationCoef, epoch);
         }
 
         return weights;
