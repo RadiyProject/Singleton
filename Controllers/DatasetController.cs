@@ -214,7 +214,7 @@ public class DatasetController : ControllerBase
             await new StreamReader(Path.Combine("/app/Dataset", "TrainReduced.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
 
-        weights = new GradientDescent().Train(rules, weights, dataset, function, "cut", epochsCount);
+        weights = await new GradientDescent().Train(rules, weights, dataset, function, "cut", epochsCount);
 
         using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "Weights.txt")))
         {
