@@ -10,7 +10,7 @@ public class GradientDescent
         Dictionary<string, float[]> dataset, MembershipFunction function, string outputName, 
         int epochsCount = 5) 
     {
-        float learningRate = 0.0003f;
+        float learningRate = 0.002f;
         List<float> realOut = []; List<float> expectedOut = [];
         int batchCount = 10;
         for (int epoch = 0; epoch < epochsCount; epoch++) {
@@ -21,18 +21,25 @@ public class GradientDescent
 
             Dictionary<string, float[]>[] batchedDataset = new Dictionary<string, float[]>[batchCount];
             Dictionary<string, List<float>>[] tempBatches = new Dictionary<string, List<float>>[batchCount];
-            foreach(KeyValuePair<string, float[]> column in dataset)
-                for(int i = 0; i < column.Value.Length; i++) {
-                    int currentIdx = new Random().Next(0, batchCount);
+            for (int batch = 0; batch < batchCount; batch++)
+                tempBatches[batch] = [];
+            
+            for(int i = 0; i < dataset.First().Value.Length; i++) {
+                int currentIdx = new Random().Next(0, batchCount);
+                foreach(KeyValuePair<string, float[]> column in dataset) {
                     if (!tempBatches[currentIdx].ContainsKey(column.Key))
                         tempBatches[currentIdx][column.Key] = [];
 
                     tempBatches[currentIdx][column.Key].Add(column.Value[i]);
                 }
+            }
 
-            for (int batch = 0; batch < batchCount; batch++) 
-                foreach(KeyValuePair<string, List<float>> column in tempBatches[batch])
+            for (int batch = 0; batch < batchCount; batch++) {
+                batchedDataset[batch] = [];
+
+                foreach(KeyValuePair<string, List<float>> column in tempBatches[batch]) 
                     batchedDataset[batch][column.Key] = [.. tempBatches[batch][column.Key]];
+            }
 
             for (int batch = 0; batch < batchCount; batch++) {
                 float deviation = 0;
@@ -47,8 +54,15 @@ public class GradientDescent
 
                     for (int i = 0; i < wj.Length; i++) {
                         Dictionary<string, float> input = [];
-                        foreach(KeyValuePair<string, float[]> column in batchedDataset[batch])
+                        foreach(KeyValuePair<string, float[]> column in batchedDataset[batch]) {
+                        if (row >= column.Value.Length) {
+                            List<string> arr = [];
+                            foreach (KeyValuePair<string, float[]> columnd in batchedDataset[batch])
+                                arr.Add(columnd.Key + ": " + columnd.Value.Length);
+                            throw new Exception($"{row} {column.Value.Length} {batchLength}. Descrpition: {Newtonsoft.Json.JsonConvert.SerializeObject(arr)}");
+                        }
                             input[column.Key == outputName ? "output" : column.Key] = column.Value[row];
+                        }
 
                         wj[i] = singleton.GetDegree(input, i);
                         if (wj[i] > lowerMij)
@@ -63,7 +77,6 @@ public class GradientDescent
                     }
                     deviation += new StandardDeviation().DerivativeCalculateRow(result, dataset[outputName][row]);
                     error += new StandardDeviation().CalculateRow(result, dataset[outputName][row]);
-                    //Console.WriteLine($"Error: {error}. Epochs: {epoch}. Row: {row}");
 
                     for (int i = 0; i < wj.Length; i++)
                         gradients[i] += learningRate * deviation * ((rules["output"][i] < wj[i] ? rules["output"][i] : wj[i]) / lowerMij);
@@ -71,7 +84,7 @@ public class GradientDescent
                 for (int i = 0; i < gradients.Length; i++)
                     weights["output"][i] -= gradients[i] / batchLength;
             }
-            Console.WriteLine($"Error: {error / dataset.Values.First().Length}. Epochs: {epoch}");
+            Console.WriteLine($"Error: {MathF.Sqrt(error / dataset.Values.First().Length)}. Error^2: {error / dataset.Values.First().Length}. Epochs: {epoch}");
             if (isLast)
                 Console.WriteLine($"Overall accuracy: {new DeterminationCoefficient().Calculate(realOut, expectedOut)}.");
         }
