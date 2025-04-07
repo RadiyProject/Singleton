@@ -14,7 +14,7 @@ public class GradientDescent
         float attenuationCoef = 0.9f;
         float learningRate = startLearningRate;
         List<float> realOut = []; List<float> expectedOut = [];
-        int batchCount = 2;
+        int batchCount = 50;
 
         //float momentum = 0.9f;
         //float[] velocity = new float[weights["output"].Length];
@@ -46,7 +46,6 @@ public class GradientDescent
             }
 
             for (int batch = 0; batch < batchCount; batch++) {
-                float deviation = 0;
                 float[] gradients = new float[weights["output"].Length];
                 int batchLength = batchedDataset[batch].Values.First().Length;
 
@@ -73,20 +72,14 @@ public class GradientDescent
                         realOut.Add(result);
                         expectedOut.Add(dataset[outputName][row]);
                     }*/
-                    deviation = new StandardDeviation().DerivativeCalculateRow(result, batchedDataset[batch][outputName][row]);
+                    float deviation = new StandardDeviation().DerivativeCalculateRow(result, batchedDataset[batch][outputName][row]);
                     error += new StandardDeviation().CalculateRow(result, batchedDataset[batch][outputName][row]);
 
                     for (int i = 0; i < wj.Length; i++)
                         gradients[i] += learningRate * deviation * (wj[i] / lowerMij);
                 });
-                for (int i = 0; i < gradients.Length; i++) {
+                for (int i = 0; i < gradients.Length; i++)
                     weights["output"][i] -= gradients[i] / batchLength;
-                    /*if (weights["output"][i] > 1)
-                        weights["output"][i] = 1;
-
-                    if (weights["output"][i] < 0)
-                        weights["output"][i] = 0;*/
-                }
             }
             Console.WriteLine($"Error: {MathF.Sqrt(error / dataset.Values.First().Length)}. Error^2: {error / dataset.Values.First().Length}. Epochs: {epoch}");
             //if (isLast)
@@ -97,7 +90,7 @@ public class GradientDescent
                 await outputFile.WriteAsync(Newtonsoft.Json.JsonConvert.SerializeObject(weights));
             }
 
-            if ((epoch + 1) % 100 == 0)
+            if ((epoch + 1) % 5 == 0)
                 learningRate *= attenuationCoef;
         }
 

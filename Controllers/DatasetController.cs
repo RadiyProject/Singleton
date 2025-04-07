@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Singleton.Models;
 using Singleton.Models.MachineLearning;
+using Singleton.Models.MachineLearning.Deviations;
 using Singleton.Models.MembershipFunctions;
 
 namespace Singleton.Controllers;
@@ -8,7 +9,7 @@ namespace Singleton.Controllers;
 [ApiController]
 public class DatasetController : ControllerBase
 {
-    private readonly MembershipFunction function = new Triangle(0, 1, 6);
+    private readonly MembershipFunction function = new Triangle(0, 1, 7);
 
     [HttpGet("")]
     public async Task<IActionResult> GetFile()
@@ -222,5 +223,40 @@ public class DatasetController : ControllerBase
         }
 
         return Ok("Ok");
+    }
+
+    [HttpGet("check-test")]
+    public async Task<IActionResult> CheckTest()
+    {
+        var rules = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "RulesBase.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var weights = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "Weights.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        var dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
+            await new StreamReader(Path.Combine("/app/Dataset", "TestReduced.txt")).ReadToEndAsync()) 
+                ?? throw new InvalidDataException();
+
+        string output = "carat";
+        float error = 0;
+        float predicted = 0;
+        float expected = 0;
+        for(int i = 0; i < dataset.First().Value.Length; i++) {
+            Dictionary<string, float> input = [];
+            foreach(KeyValuePair<string, float[]> column in dataset)
+                input[column.Key == output ? "output" : column.Key] = column.Value[i];
+
+            float result = new Models.OutputFunctions.Singleton(rules, function, 1, weights).CalculateOutput(input);
+            if (MathF.Abs(predicted - expected) > MathF.Abs(result - dataset[output][i]) || predicted == 0 && expected == 0) {
+                predicted = result;
+                expected = dataset[output][i];
+            }
+            error += new StandardDeviation().CalculateRow(result, dataset[output][i]);
+        }
+
+        return Ok("Error: " + error / dataset.First().Value.Length + ". Min predicted: " + predicted + ". Min expected: " + expected);
     }
 }

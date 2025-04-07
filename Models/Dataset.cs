@@ -185,6 +185,7 @@ public class Dataset {
 
         int datasetCount = dataset.Values.First().Length;
         int resultCount = (int)(datasetCount * reduceValue);
+        Console.WriteLine("Reduced dataset count: " + resultCount);
         int step = datasetCount / resultCount;
         Dictionary<string, float[]> result = [];
         Dictionary<string, List<float>> temp = [];
