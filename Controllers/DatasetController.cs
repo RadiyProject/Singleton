@@ -8,7 +8,7 @@ namespace Singleton.Controllers;
 [ApiController]
 public class DatasetController : ControllerBase
 {
-    private readonly MembershipFunction function = new Gauss(0, 1, 8);
+    private readonly MembershipFunction function = new Trapezoid(0, 1, 7);
 
     [HttpGet("")]
     public async Task<IActionResult> GetFile()
@@ -211,7 +211,7 @@ public class DatasetController : ControllerBase
                 ?? throw new InvalidDataException();
 
         var dataset = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, float[]>>(
-            await new StreamReader(Path.Combine("/app/Dataset", "Train.txt")).ReadToEndAsync()) 
+            await new StreamReader(Path.Combine("/app/Dataset", "TrainReduced.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
 
         weights = await new GradientDescent().Train(rules, weights, dataset, function, "cut", epochsCount);
