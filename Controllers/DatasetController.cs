@@ -8,12 +8,12 @@ namespace Singleton.Controllers;
 [ApiController]
 public class DatasetController : ControllerBase
 {
-    private readonly MembershipFunction function = new Gauss(0, 1, 7);
+    private readonly MembershipFunction function = new Triangle(0, 1, 6);
 
     [HttpGet("")]
     public async Task<IActionResult> GetFile()
     {
-        var dataset = await Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["cut", "color", "clarity", "depth", "table"]/*, rowsCount: 5000*/);
+        var dataset = await Dataset.ReadDataset("/app/Dataset/diamonds.csv", ["carat", "price", "x (Premium)", "z (Very Good)"]/*, rowsCount: 5000*/);
         var result = Dataset.ConvertDatasetToNormalizedData(dataset);
 
         using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "PreparedDataset.txt")))
@@ -194,9 +194,9 @@ public class DatasetController : ControllerBase
                 ?? throw new InvalidDataException();
 
         var result = new Models.OutputFunctions.Singleton(rules, function, 1, weights).CalculateOutput(input);
-        var category = Models.OutputFunctions.Singleton.DefuzzToCategory(result, distinct);
+        //var category = Models.OutputFunctions.Singleton.DefuzzToCategory(result, distinct);
 
-        return Ok(category);
+        return Ok(result);
     }
 
     [HttpPost("train")]
@@ -214,7 +214,7 @@ public class DatasetController : ControllerBase
             await new StreamReader(Path.Combine("/app/Dataset", "TrainReduced.txt")).ReadToEndAsync()) 
                 ?? throw new InvalidDataException();
 
-        weights = await new GradientDescent().Train(rules, weights, dataset, function, "cut", epochsCount);
+        weights = await new GradientDescent().Train(rules, weights, dataset, function, "carat", epochsCount);
 
         using (StreamWriter outputFile = new (Path.Combine("/app/Dataset", "Weights.txt")))
         {
