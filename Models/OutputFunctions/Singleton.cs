@@ -10,42 +10,16 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
         int ruleLength = rules["output"].Length;
         if (ruleLength == 0)
             throw new InvalidDataException("База правил пуста");
-
-        float r = rules["output"][0] * (weights != null ? weights["output"][0] : 1);
-        int rIdx = 0;
-        for(int i = 1; i < ruleLength; i++)
-            if (rules["output"][i] * (weights != null ? weights["output"][i] : 1) > r) {
-                r = rules["output"][i] * (weights != null ? weights["output"][i] : 1);
-                rIdx = i;
-            }
         
-        float mij = Multiply(rules, input, rIdx);
-        float upperMij = (mij >= r) ? r : mij;
-        float downMij = upperMij;
+        float m = 0;
+        float rm = 0;
         for(int i = 0; i < ruleLength; i++) {
-            mij = Multiply(rules, input, i);
-            if (mij > downMij)
-                downMij = mij;
+            float mj = Multiply(rules, input, i);
+            m += mj;
+            rm += rules["output"][i] * mj;
         }
         
-        return upperMij / downMij;
-    }
-
-    public (int, float) GetR()
-    {
-        int ruleLength = rules["output"].Length;
-        if (ruleLength == 0)
-            throw new InvalidDataException("База правил пуста");
-
-        float r = rules["output"][0] * (weights != null ? weights["output"][0] : 1);
-        int rIdx = 0;
-        for(int i = 1; i < ruleLength; i++)
-            if (rules["output"][i] * (weights != null ? weights["output"][i] : 1) > r) {
-                r = rules["output"][i] * (weights != null ? weights["output"][i] : 1);
-                rIdx = i;
-            }
-        
-        return (rIdx, r);
+        return (float)(rm / m);
     }
 
     public float GetDegree(Dictionary<string, float> input, int rIdx)
@@ -66,10 +40,7 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
             if (rule.Key == "output")
                 continue;
 
-            float value = function.CalculateDerivativeMembershipValue(input[rule.Key] + (weights != null ? weights[rule.Key][idx] : 0), (int)rule.Value[idx]);
-
-            if (max < value)
-                max = value;
+            max += function.CalculateDerivativeMembershipValue(input[rule.Key] + (weights != null ? weights[rule.Key][idx] : 0), (int)rule.Value[idx]);
         }
 
         return max;
@@ -78,20 +49,17 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
     private float Multiply(Dictionary<string, float[]> rules, 
         Dictionary<string, float> input, int idx)
     {
-        float min = upperBorder;
+        float? result = null;
         foreach(KeyValuePair<string, float[]> rule in rules) {
             if (rule.Key == "output")
                 continue;
 
             float value = function.CalculateMembershipValue(input[rule.Key], (int)rule.Value[idx]);
-            if (value <= 0.01f) 
-                value = upperBorder;
 
-            if (min > value)
-                min = value;
+            result = result == null ? value : result * value;
         }
 
-        return min;
+        return result ?? 0;
     }
 
     public static string DefuzzToCategory(float value, Dictionary<string, float[]> distinctOutputs)

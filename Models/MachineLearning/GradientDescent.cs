@@ -10,8 +10,8 @@ public class GradientDescent
         Dictionary<string, float[]> dataset, MembershipFunction function, string outputName, 
         int epochsCount = 5) 
     {
-        float startLearningRate = 0.5f;
-        float attenuationCoef = 0.9f;
+        float startLearningRate = 0.05f;
+        float attenuationCoef = 0.98f;
         float learningRate = startLearningRate;
         List<float> realOut = []; List<float> expectedOut = [];
         int batchCount = 50;
@@ -51,23 +51,22 @@ public class GradientDescent
 
                 var singleton = new OutputFunctions.Singleton(rules, function, 1, weights);
                 float[] wj = new float[rules.Values.First().Length];
-                (int, float) r = singleton.GetR();
 
                 Parallel.For(0, batchLength, row => {
-                    float lowerMij = 0;
-
+                    float m = 0;
+                    float rm = 0;
                     for (int i = 0; i < wj.Length; i++) {
                         Dictionary<string, float> input = [];
                         foreach(KeyValuePair<string, float[]> column in batchedDataset[batch])
                             input[column.Key == outputName ? "output" : column.Key] = column.Value[row];
 
                         wj[i] = singleton.GetDegree(input, i);
-                        if (wj[i] > lowerMij)
-                            lowerMij = wj[i];
+                        rm += wj[i] * rules["output"][i] * weights["output"][i];
+                        m += wj[i];
                     }
-                    float upperMij = (wj[r.Item1] >= r.Item2) ? r.Item2 : wj[r.Item1];
+                    float _m = 1 / m;
+                    float result = rm * _m;
 
-                    float result = upperMij / lowerMij;
                     /*if (isLast) {
                         realOut.Add(result);
                         expectedOut.Add(dataset[outputName][row]);
@@ -76,7 +75,7 @@ public class GradientDescent
                     error += new StandardDeviation().CalculateRow(result, batchedDataset[batch][outputName][row]);
 
                     for (int i = 0; i < wj.Length; i++)
-                        gradients[i] += learningRate * deviation * (wj[i] / lowerMij);
+                        gradients[i] += learningRate * deviation * wj[i] * _m;
                 });
                 for (int i = 0; i < gradients.Length; i++)
                     weights["output"][i] -= gradients[i] / batchLength;
