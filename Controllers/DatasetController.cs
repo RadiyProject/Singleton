@@ -242,15 +242,15 @@ public class DatasetController : ControllerBase
 
         string output = "carat";
         float error = 0;
-        float predicted = 0;
-        float expected = 0;
+        float? predicted = null;
+        float? expected = null;
         for(int i = 0; i < dataset.First().Value.Length; i++) {
             Dictionary<string, float> input = [];
             foreach(KeyValuePair<string, float[]> column in dataset)
                 input[column.Key == output ? "output" : column.Key] = column.Value[i];
 
             float result = new Models.OutputFunctions.Singleton(rules, function, 1, weights).CalculateOutput(input);
-            if (MathF.Abs(predicted - expected) > MathF.Abs(result - dataset[output][i]) || predicted == 0 && expected == 0) {
+            if (predicted == null && expected == null || MathF.Abs((float)predicted! - (float)expected!) > MathF.Abs(result - dataset[output][i])) {
                 predicted = result;
                 expected = dataset[output][i];
             }

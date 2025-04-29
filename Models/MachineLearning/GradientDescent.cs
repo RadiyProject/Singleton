@@ -10,8 +10,8 @@ public class GradientDescent
         Dictionary<string, float[]> dataset, MembershipFunction function, string outputName, 
         int epochsCount = 5) 
     {
-        float startLearningRate = 0.05f;
-        float attenuationCoef = 0.98f;
+        float startLearningRate = 0.08f;
+        float attenuationCoef = 0.96f;
         float learningRate = startLearningRate;
         List<float> realOut = []; List<float> expectedOut = [];
         int batchCount = 50;
@@ -19,7 +19,7 @@ public class GradientDescent
         //float momentum = 0.9f;
         //float[] velocity = new float[weights["output"].Length];
 
-        int autosaveCount = 50;
+        int autosaveCount = 20;
         for (int epoch = 0; epoch < epochsCount; epoch++) {
             float error = 0;
             //bool isLast = epoch == epochsCount - 1;

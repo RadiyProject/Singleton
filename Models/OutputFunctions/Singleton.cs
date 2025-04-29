@@ -16,9 +16,12 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
         for(int i = 0; i < ruleLength; i++) {
             float mj = Multiply(rules, input, i);
             m += mj;
-            rm += rules["output"][i] * mj;
+            rm += rules["output"][i] * weights!["output"][i] * mj;
         }
         
+        if(m == 0)
+            m = 0.001f;
+
         return (float)(rm / m);
     }
 
@@ -58,8 +61,10 @@ public class Singleton(Dictionary<string, float[]> rules, MembershipFunction fun
 
             result = result == null ? value : result * value;
         }
+        if(result == null)
+            throw new Exception("Result incorrect");
 
-        return result ?? 0;
+        return (float)result;
     }
 
     public static string DefuzzToCategory(float value, Dictionary<string, float[]> distinctOutputs)
