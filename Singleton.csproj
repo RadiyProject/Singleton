@@ -9,6 +9,8 @@
   <ItemGroup>
     <PackageReference Include="Csv" Version="2.0.128" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.3" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.8.3" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.32.0" />
     <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="28.2.11" />
   </ItemGroup>
 
