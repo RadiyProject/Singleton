@@ -13,3 +13,6 @@ down:
 restart:
 	make down
 	make up
+
+test:
+	docker compose exec singleton bash -c "cd app && dotnet test --directory Tests"
